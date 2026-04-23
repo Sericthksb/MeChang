@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface NavDrawerProps {
   locale: string
@@ -112,18 +113,15 @@ function ComingSoonRow({ item }: { item: ComingSoonItem }) {
 export default function NavDrawer({ locale, isLoggedIn }: NavDrawerProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const profileHref = isLoggedIn ? `/${locale}/profile` : `/${locale}/login`
 
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="text-xl font-bold tracking-tight text-orange-500"
-      >
-        MeChang
-      </button>
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
+  const drawer = (
+    <>
       {isOpen ? (
         <div
           className="fixed inset-0 z-40 bg-black/40"
@@ -191,6 +189,20 @@ export default function NavDrawer({ locale, isLoggedIn }: NavDrawerProps) {
           <ComingSoonRow item={{ label: 'Earnings', emoji: '💰' }} />
         </nav>
       </div>
+    </>
+  )
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="text-xl font-bold tracking-tight text-orange-500"
+      >
+        MeChang
+      </button>
+
+      {mounted ? createPortal(drawer, document.body) : null}
     </>
   )
 }
