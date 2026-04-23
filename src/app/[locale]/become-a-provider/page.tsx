@@ -17,13 +17,13 @@ export default async function BecomeAProviderPage({
     redirect(`/${locale}/login?redirect=/become-a-provider`)
   }
 
-  const { data: profileUser } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  const [userResult, providerResult] = await Promise.all([
+    supabase.from('users').select('role').eq('id', user.id).single(),
+    supabase.from('provider_profiles').select('id').eq('user_id', user.id).maybeSingle(),
+  ])
 
-  if (profileUser?.role === 'provider') {
+  // Only redirect if they have BOTH provider role AND a completed profile row
+  if (userResult.data?.role === 'provider' && providerResult.data) {
     redirect(`/${locale}/profile`)
   }
 
