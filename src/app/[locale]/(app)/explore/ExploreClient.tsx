@@ -1,6 +1,6 @@
 'use client'
 
-import { useDeferredValue, useState } from 'react'
+import { useDeferredValue, useEffect, useState } from 'react'
 import CategoryFilter from '@/components/CategoryFilter'
 import ProviderCard from '@/components/ProviderCard'
 import SearchBar from '@/components/SearchBar'
@@ -22,6 +22,8 @@ interface ProviderProfileWithUser extends ProviderProfile {
 interface ExploreClientProps {
   locale: string
   providers: ProviderProfileWithUser[]
+  initialQuery?: string
+  initialCategory?: string
 }
 
 function matchesCategory(profile: ProviderProfileWithUser, categoryId: string) {
@@ -111,10 +113,25 @@ function getPricingLabel(profile: ProviderProfileWithUser) {
 export default function ExploreClient({
   locale,
   providers,
+  initialQuery = '',
+  initialCategory = 'all',
 }: ExploreClientProps) {
-  const [activeCategory, setActiveCategory] = useState('all')
-  const [query, setQuery] = useState('')
+  const normalizedCategory = (initialCategory || 'all').toLowerCase()
+  const resolvedCategory = CATEGORIES.some((c) => c.id === normalizedCategory)
+    ? normalizedCategory
+    : 'all'
+
+  const [activeCategory, setActiveCategory] = useState(resolvedCategory)
+  const [query, setQuery] = useState(initialQuery)
   const deferredQuery = useDeferredValue(query)
+
+  useEffect(() => {
+    setActiveCategory(resolvedCategory)
+  }, [resolvedCategory])
+
+  useEffect(() => {
+    setQuery(initialQuery)
+  }, [initialQuery])
 
   const filteredProviders = providers.filter((provider) => {
     return (
@@ -128,6 +145,7 @@ export default function ExploreClient({
       <div className="px-4">
         <SearchBar
           placeholder="What do you need help with?"
+          value={query}
           onSearch={setQuery}
         />
       </div>

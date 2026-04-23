@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { ProviderProfile, User } from '@/types/database'
 
 const BROWSE_FILTERS = [
@@ -20,13 +21,39 @@ const HOT_SERVICES = [
   { label: 'Errand Runner', category: 'Personal', from: 300 },
 ] as const
 
-const CATEGORY_TILES = [
-  { label: 'Home',       gradient: 'from-orange-400 to-orange-500', accent: false },
-  { label: 'Repair',     gradient: 'from-blue-400 to-blue-600',     accent: false },
-  { label: 'IT',         gradient: 'from-indigo-400 to-indigo-600', accent: false },
-  { label: 'Cleaning',   gradient: 'from-teal-400 to-teal-500',     accent: false },
-  { label: 'Personal',   gradient: 'from-purple-400 to-purple-500', accent: false },
-  { label: 'View All →', gradient: 'from-orange-100 to-orange-200', accent: true  },
+const MOCK_PROMOS = [
+  {
+    id: 'newYear',
+    gradient: 'from-amber-100 to-orange-100',
+    border: 'border-orange-200',
+    titleColor: 'text-orange-900',
+    descColor: 'text-orange-800',
+    href: '/promotions/new-year-refresh',
+  },
+  {
+    id: 'festival',
+    gradient: 'from-pink-100 to-rose-100',
+    border: 'border-rose-200',
+    titleColor: 'text-rose-900',
+    descColor: 'text-rose-800',
+    href: '/promotions/festival-childcare',
+  },
+  {
+    id: 'moving',
+    gradient: 'from-blue-100 to-indigo-100',
+    border: 'border-indigo-200',
+    titleColor: 'text-indigo-900',
+    descColor: 'text-indigo-800',
+    href: '/promotions/moving-day',
+  },
+  {
+    id: 'rainy',
+    gradient: 'from-emerald-100 to-teal-100',
+    border: 'border-teal-200',
+    titleColor: 'text-teal-900',
+    descColor: 'text-teal-800',
+    href: '/promotions/rainy-season',
+  },
 ] as const
 
 export interface ProviderProfileWithUser extends ProviderProfile {
@@ -88,6 +115,7 @@ export default function HomeClient({
   featuredProviders,
 }: HomeClientProps) {
   const router = useRouter()
+  const t = useTranslations('promos')
   const [query, setQuery] = useState('')
   const [activeFilter, setActiveFilter] =
     useState<(typeof BROWSE_FILTERS)[number]>('All')
@@ -96,7 +124,18 @@ export default function HomeClient({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    router.push(`/${locale}/explore`)
+    const searchParams = new URLSearchParams()
+    const trimmedQuery = query.trim()
+
+    if (trimmedQuery) {
+      searchParams.set('q', trimmedQuery)
+    }
+
+    const exploreUrl = searchParams.toString()
+      ? `/${locale}/explore?${searchParams.toString()}`
+      : `/${locale}/explore`
+
+    router.push(exploreUrl)
   }
 
   return (
@@ -124,6 +163,31 @@ export default function HomeClient({
             <SearchIcon />
           </button>
         </form>
+      </section>
+
+      {/* Seasonal Campaigns */}
+      <section className="pb-3 pt-1">
+        <h2 className="px-4 pb-3 text-base font-bold text-gray-900">
+          {t('title')}
+        </h2>
+        <div className="overflow-x-auto px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3 pb-2">
+            {MOCK_PROMOS.map((promo) => (
+              <Link
+                key={promo.id}
+                href={`/${locale}${promo.href}`}
+                className={`w-64 shrink-0 overflow-hidden rounded-2xl border ${promo.border} bg-gradient-to-br ${promo.gradient} p-4 shadow-sm transition-transform hover:scale-[1.02]`}
+              >
+                <h3 className={`text-sm font-bold ${promo.titleColor}`}>
+                  {t(`campaigns.${promo.id}.title`)}
+                </h3>
+                <p className={`mt-1.5 text-xs leading-relaxed ${promo.descColor}`}>
+                  {t(`campaigns.${promo.id}.desc`)}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
 
       {featuredProviders.length > 0 ? (
@@ -275,32 +339,6 @@ export default function HomeClient({
           </div>
         </div>
       )}
-
-      {/* Browse by category */}
-      <h2 className="mt-4 mb-3 px-4 text-base font-bold text-gray-900">
-        Browse by category
-      </h2>
-
-      <div className="grid grid-cols-2 gap-3 px-4 pb-4">
-        {CATEGORY_TILES.map((tile) => (
-          <Link
-            key={tile.label}
-            href={`/${locale}/explore`}
-            className="relative aspect-square overflow-hidden rounded-2xl"
-          >
-            <div
-              className={`absolute inset-0 bg-gradient-to-br ${tile.gradient}`}
-            />
-            <p
-              className={`absolute bottom-0 left-0 p-3 text-sm font-semibold ${
-                tile.accent ? 'text-orange-700' : 'text-white'
-              }`}
-            >
-              {tile.label}
-            </p>
-          </Link>
-        ))}
-      </div>
     </>
   )
 }

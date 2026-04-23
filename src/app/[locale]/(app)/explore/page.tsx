@@ -8,10 +8,13 @@ interface ProviderProfileWithUser extends ProviderProfile {
 
 export default async function ExplorePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>
+  searchParams: Promise<{ q?: string; category?: string }>
 }) {
   const { locale } = await params
+  const { q, category } = await searchParams
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -30,7 +33,7 @@ export default async function ExplorePage({
       <h1 className="text-2xl font-bold text-gray-900 px-4 pt-6 pb-2">
         Find trusted services in Phuket
       </h1>
-      <ExploreClient locale={locale} providers={providers} />
+      <ExploreClient locale={locale} providers={providers} initialQuery={q} initialCategory={category} />
     </main>
   )
 }

@@ -4,6 +4,7 @@ import { ChangeEvent } from 'react'
 
 export interface SearchBarProps {
   placeholder?: string
+  value?: string
   onSearch?: (query: string) => void
 }
 
@@ -27,6 +28,7 @@ function SearchIcon() {
 
 export default function SearchBar({
   placeholder = 'Search',
+  value,
   onSearch,
 }: SearchBarProps) {
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -38,6 +40,7 @@ export default function SearchBar({
       <SearchIcon />
       <input
         type="search"
+        value={value}
         onChange={handleChange}
         placeholder={placeholder}
         className="h-11 w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 text-sm text-gray-900 shadow-[0_1px_2px_rgba(15,23,42,0.04)] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400"

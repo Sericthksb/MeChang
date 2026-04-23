@@ -57,5 +57,47 @@
     "proFeature2": "Unlimited photos + video",
     "proFeature3": "LINE priority + Hotline",
     "footerNote": "All plans include a free Verified badge — submit your work certificate to apply."
+  },
+  "promos": {
+    "title": "Seasonal Campaigns",
+    "campaigns": {
+      "newYear": {
+        "title": "New Year Home Refresh",
+        "desc": "Start fresh! Top cleaners & handymen to revitalize your space."
+      },
+      "festival": {
+        "title": "Festival Childcare",
+        "desc": "Enjoy the festivities while trusted sitters care for your kids."
+      },
+      "moving": {
+        "title": "Moving Day Help",
+        "desc": "Stress-free relocation with our professional moving partners."
+      },
+      "rainy": {
+        "title": "Rainy Season Prep",
+        "desc": "Secure your roof and fix leaks before the downpours begin."
+      }
+    }
+  },
+  "promoDetail": {
+    "suggestedProviders": "Suggested Providers",
+    "exploreMore": "Explore More Options",
+    "noProviders": "No providers found for this campaign.",
+    "newYear": {
+      "headline": "Start the Year Fresh",
+      "description": "Book our top-rated cleaners and handymen to get your home sparkling and in perfect working order for the new year."
+    },
+    "festival": {
+      "headline": "Enjoy the Festivities",
+      "description": "Don't let childcare worries keep you at home. Find trusted sitters for peace of mind while you celebrate."
+    },
+    "moving": {
+      "headline": "Stress-Free Relocation",
+      "description": "Moving is hard enough. Let our professional partners handle the heavy lifting, packing, and transport."
+    },
+    "rainy": {
+      "headline": "Prepare for the Downpours",
+      "description": "Fix leaks, secure your roof, and clear your gutters before the rainy season starts in full force."
+    }
   }
 }
