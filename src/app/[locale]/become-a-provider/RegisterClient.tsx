@@ -458,7 +458,7 @@ export default function RegisterClient({
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-6">
-      <div className="mx-auto w-full max-w-2xl rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
+      <div className="mx-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="mb-6">
           <p className="text-xs text-gray-500">{getStepLabel(step)}</p>
           <div className="mt-3 flex gap-2">
