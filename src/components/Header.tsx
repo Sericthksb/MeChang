@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import NavDrawer from '@/components/NavDrawer'
 
 interface HeaderProps {
   locale: string
@@ -20,12 +21,7 @@ export default async function Header({ locale }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        <Link
-          href={`/${locale}/`}
-          className="text-xl font-bold tracking-tight text-orange-500"
-        >
-          MeChang
-        </Link>
+        <NavDrawer locale={locale} isLoggedIn={!!user} />
 
         <div className="flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher />

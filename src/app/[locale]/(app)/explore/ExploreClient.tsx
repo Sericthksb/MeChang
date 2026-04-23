@@ -1,19 +1,13 @@
 'use client'
 
 import { useDeferredValue, useEffect, useState } from 'react'
-import CategoryFilter from '@/components/CategoryFilter'
+import CategoryGrid from '@/components/CategoryGrid'
 import ProviderCard from '@/components/ProviderCard'
 import SearchBar from '@/components/SearchBar'
 import type { ProviderProfile, User } from '@/types/database'
 
-const CATEGORIES = [
-  { id: 'all', label: 'All Services' },
-  { id: 'home', label: 'Home' },
-  { id: 'repair', label: 'Repair' },
-  { id: 'it', label: 'IT' },
-  { id: 'cleaning', label: 'Cleaning' },
-  { id: 'personal', label: 'Personal' },
-] as const
+const CATEGORY_IDS = ['home', 'repair', 'it', 'cleaning', 'personal', 'property', 'car', 'all'] as const
+type CategoryId = (typeof CATEGORY_IDS)[number]
 
 interface ProviderProfileWithUser extends ProviderProfile {
   users: User | null
@@ -70,6 +64,22 @@ function matchesCategory(profile: ProviderProfileWithUser, categoryId: string) {
         haystack.includes('pool') ||
         haystack.includes('garden')
       )
+    case 'property':
+      return (
+        haystack.includes('property') ||
+        haystack.includes('garden') ||
+        haystack.includes('pool') ||
+        haystack.includes('landscape') ||
+        haystack.includes('lawn')
+      )
+    case 'car':
+      return (
+        haystack.includes('car') ||
+        haystack.includes('auto') ||
+        haystack.includes('vehicle') ||
+        haystack.includes('tyre') ||
+        haystack.includes('mechanic')
+      )
     case 'personal':
       return (
         haystack.includes('chef') ||
@@ -117,11 +127,11 @@ export default function ExploreClient({
   initialCategory = 'all',
 }: ExploreClientProps) {
   const normalizedCategory = (initialCategory || 'all').toLowerCase()
-  const resolvedCategory = CATEGORIES.some((c) => c.id === normalizedCategory)
-    ? normalizedCategory
+  const resolvedCategory = CATEGORY_IDS.includes(normalizedCategory as CategoryId)
+    ? (normalizedCategory as CategoryId)
     : 'all'
 
-  const [activeCategory, setActiveCategory] = useState(resolvedCategory)
+  const [activeCategory, setActiveCategory] = useState<CategoryId>(resolvedCategory)
   const [query, setQuery] = useState(initialQuery)
   const deferredQuery = useDeferredValue(query)
 
@@ -150,13 +160,10 @@ export default function ExploreClient({
         />
       </div>
 
-      <CategoryFilter
-        categories={CATEGORIES.map((category) => ({
-          id: category.id,
-          label: category.label,
-        }))}
+      <CategoryGrid
+        locale={locale}
         activeId={activeCategory}
-        onChange={setActiveCategory}
+        onSelect={(id) => setActiveCategory(id as CategoryId)}
       />
 
       {filteredProviders.length === 0 ? (
