@@ -72,17 +72,17 @@ export async function submitRegistration(
     return { error: 'Not authenticated' }
   }
 
-  const { data: existingUser, error: existingUserError } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  const [userResult, existingProfileResult] = await Promise.all([
+    supabase.from('users').select('role').eq('id', user.id).single(),
+    supabase.from('provider_profiles').select('id').eq('user_id', user.id).maybeSingle(),
+  ])
 
-  if (existingUserError || !existingUser) {
-    return { error: existingUserError?.message ?? 'User profile not found' }
+  if (userResult.error || !userResult.data) {
+    return { error: userResult.error?.message ?? 'User profile not found' }
   }
 
-  if (existingUser.role === 'provider') {
+  // Only redirect if they already have a completed provider profile
+  if (userResult.data.role === 'provider' && existingProfileResult.data) {
     redirect(`/${data.locale}/profile`)
   }
 

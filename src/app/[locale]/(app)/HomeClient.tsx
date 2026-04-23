@@ -166,24 +166,38 @@ export default function HomeClient({
       </section>
 
       {/* Seasonal Campaigns */}
-      <section className="pb-3 pt-1">
-        <h2 className="px-4 pb-3 text-base font-bold text-gray-900">
-          {t('title')}
-        </h2>
+      <section className="pb-4 pt-1">
         <div className="overflow-x-auto px-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex gap-3 pb-2">
+          <div className="flex gap-4 pb-2">
             {MOCK_PROMOS.map((promo) => (
               <Link
                 key={promo.id}
                 href={`/${locale}${promo.href}`}
-                className={`w-64 shrink-0 overflow-hidden rounded-2xl border ${promo.border} bg-gradient-to-br ${promo.gradient} p-4 shadow-sm transition-transform hover:scale-[1.02]`}
+                className={`group relative h-56 w-[19rem] shrink-0 overflow-hidden rounded-[2rem] border ${promo.border} bg-gradient-to-br ${promo.gradient} p-4 shadow-sm transition-transform duration-200 hover:-translate-y-1`}
               >
-                <h3 className={`text-sm font-bold ${promo.titleColor}`}>
-                  {t(`campaigns.${promo.id}.title`)}
-                </h3>
-                <p className={`mt-1.5 text-xs leading-relaxed ${promo.descColor}`}>
-                  {t(`campaigns.${promo.id}.desc`)}
-                </p>
+                <div className="absolute inset-x-4 top-4 flex items-start justify-between">
+                  <div className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-gray-600 backdrop-blur-sm">
+                    MeChang Picks
+                  </div>
+                  <div className="rounded-full bg-white/70 px-3 py-1 text-[11px] font-medium text-gray-700 backdrop-blur-sm">
+                    Preview
+                  </div>
+                </div>
+
+                <div className="absolute left-8 top-16 h-24 w-40 rotate-[-11deg] rounded-[1.75rem] border border-white/60 bg-white/55 shadow-[0_20px_40px_rgba(255,255,255,0.25)] backdrop-blur-sm transition-transform duration-200 group-hover:rotate-[-13deg]" />
+                <div className="absolute left-16 top-20 h-28 w-44 rotate-[7deg] rounded-[1.75rem] border border-white/70 bg-white/65 shadow-[0_28px_50px_rgba(15,23,42,0.12)] backdrop-blur-sm transition-transform duration-200 group-hover:translate-y-1" />
+                <div className="absolute inset-x-10 bottom-16 h-24 rounded-[1.75rem] border border-white/80 bg-gradient-to-br from-white/95 to-white/70 shadow-[0_20px_50px_rgba(15,23,42,0.18)]" />
+
+                <div className="absolute inset-x-6 bottom-6">
+                  <div className="rounded-[1.75rem] bg-white/72 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-md">
+                    <h3 className={`text-base font-semibold ${promo.titleColor}`}>
+                      {t(`campaigns.${promo.id}.title`)}
+                    </h3>
+                    <p className={`mt-1 text-xs leading-relaxed ${promo.descColor}`}>
+                      {t(`campaigns.${promo.id}.desc`)}
+                    </p>
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
