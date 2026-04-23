@@ -107,7 +107,7 @@ export default async function AdminProvidersPage({
                         {user?.full_name ?? 'Unnamed provider'}
                       </td>
                       <td className="px-3 py-4 text-gray-600">
-                        {profile.subscription_tier === 'paid' ? 'Pro' : 'Free'}
+                        {profile.subscription_tier.charAt(0).toUpperCase() + profile.subscription_tier.slice(1)}
                       </td>
                       <td className="px-3 py-4 text-gray-600">
                         {profile.is_active ? 'Yes' : 'No'}

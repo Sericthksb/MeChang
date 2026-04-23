@@ -149,7 +149,7 @@ export default function ExploreClient({
             const isFeatured =
               provider.boost_until !== null &&
               new Date(provider.boost_until) > new Date()
-            const isPro = provider.subscription_tier === 'paid'
+            const subscriptionTier = provider.subscription_tier
             const isVerified = provider.users?.id_verified === true
 
             return (
@@ -165,7 +165,7 @@ export default function ExploreClient({
                 languages={provider.languages}
                 pricingNote={getPricingLabel(provider)}
                 isFeatured={isFeatured}
-                isPro={isPro}
+                subscriptionTier={subscriptionTier}
                 isVerified={isVerified}
                 locale={locale}
               />

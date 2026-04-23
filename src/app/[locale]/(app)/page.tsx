@@ -1,10 +1,5 @@
-import HomeClient from './HomeClient'
+import HomeClient, { type ProviderProfileWithUser } from './HomeClient'
 import { createClient } from '@/lib/supabase/server'
-import type { ProviderProfile, User } from '@/types/database'
-
-interface ProviderProfileWithUser extends ProviderProfile {
-  users: User | null
-}
 
 export default async function HomePage({
   params,
@@ -26,9 +21,27 @@ export default async function HomePage({
     ? []
     : ((data ?? []) as ProviderProfileWithUser[])
 
+  const today = new Date().toISOString().slice(0, 10)
+  const { data: featuredData, error: featuredError } = await supabase
+    .from('provider_profiles')
+    .select('*, users(*)')
+    .eq('is_active', true)
+    .eq('subscription_tier', 'pro')
+    .gt('featured_until', today)
+    .order('avg_rating', { ascending: false })
+    .limit(6)
+
+  const featuredProviders: ProviderProfileWithUser[] = featuredError
+    ? []
+    : ((featuredData ?? []) as ProviderProfileWithUser[])
+
   return (
     <main className="pb-6">
-      <HomeClient locale={locale} providers={providers} />
+      <HomeClient
+        locale={locale}
+        providers={providers}
+        featuredProviders={featuredProviders}
+      />
     </main>
   )
 }

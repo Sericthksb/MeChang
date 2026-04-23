@@ -1,5 +1,5 @@
 export type UserRole = 'customer' | 'provider' | 'admin'
-export type SubscriptionTier = 'free' | 'paid'
+export type SubscriptionTier = 'free' | 'starter' | 'growth' | 'pro'
 export type NotificationType =
   | 'new_chat'
   | 'new_review'
@@ -37,6 +37,7 @@ export interface ProviderProfile {
   availability: AvailabilitySchedule | null
   subscription_tier: SubscriptionTier
   boost_until: string | null
+  featured_until: string | null
   monthly_lead_count: number
   lead_count_reset_at: string
   avg_rating: number
@@ -46,6 +47,7 @@ export interface ProviderProfile {
   is_active: boolean
   is_certified: boolean
   jobs_done: number
+  cover_photo_url: string | null
 }
 
 export interface AvailabilitySchedule {

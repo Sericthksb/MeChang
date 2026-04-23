@@ -30,5 +30,32 @@
     "chat": "แชท",
     "save": "บันทึก",
     "rating": "คะแนน"
+  },
+  "pricing": {
+    "title": "แพ็กเกจราคา",
+    "subtitle": "เลือกแพ็กเกจที่ดีที่สุดสำหรับธุรกิจบริการของคุณ",
+    "getStarted": "เริ่มต้นใช้งาน",
+    "freeTitle": "ฟรี",
+    "freePrice": "฿0",
+    "freeFeature1": "3 ลูกค้ามุ่งหวัง / เดือน",
+    "freeFeature2": "รูปภาพ 3 รูป",
+    "freeFeature3": "ไม่มีวิดีโอ",
+    "freeFeature4": "ไม่มีบริการช่วยเหลือ",
+    "starterTitle": "เริ่มต้น",
+    "starterPrice": "฿199",
+    "starterFeature1": "15 ลูกค้ามุ่งหวัง / เดือน",
+    "starterFeature2": "รูปภาพ 5 รูป + วิดีโอ",
+    "starterFeature3": "ช่วยเหลือผ่านอีเมล",
+    "growthTitle": "เติบโต",
+    "growthPrice": "฿499",
+    "growthFeature1": "40 ลูกค้ามุ่งหวัง / เดือน",
+    "growthFeature2": "รูปภาพ 10 รูป + วิดีโอ",
+    "growthFeature3": "ช่วยเหลือผ่าน LINE",
+    "proTitle": "โปร",
+    "proPrice": "฿990",
+    "proFeature1": "ลูกค้ามุ่งหวังไม่จำกัด",
+    "proFeature2": "รูปภาพไม่จำกัด + วิดีโอ",
+    "proFeature3": "LINE พิเศษ + สายด่วน",
+    "footerNote": "ทุกแพ็กเกจได้รับป้ายยืนยันตัวตนฟรี — ส่งใบรับรองการทำงานของคุณเพื่อสมัคร"
   }
 }

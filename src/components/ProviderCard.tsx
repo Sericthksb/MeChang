@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import type { SubscriptionTier } from '@/types/database'
 
 export interface ProviderCardProps {
   id: string
@@ -12,7 +13,7 @@ export interface ProviderCardProps {
   languages: string[]
   pricingNote: string | null
   isFeatured: boolean
-  isPro: boolean
+  subscriptionTier: SubscriptionTier
   isVerified: boolean
   locale: string
 }
@@ -102,6 +103,20 @@ function getChatLabel(locale: string): string {
   return locale === 'th' ? 'แชท' : 'Chat'
 }
 
+function getTierBadge(tier: SubscriptionTier): { label: string; className: string } | null {
+  switch (tier) {
+    case 'pro':
+      return { label: 'PRO', className: 'bg-amber-500 text-white' }
+    case 'growth':
+      return { label: 'GROWTH', className: 'bg-blue-500 text-white' }
+    case 'starter':
+      return { label: 'STARTER', className: 'bg-gray-400 text-white' }
+    case 'free':
+    default:
+      return null
+  }
+}
+
 export default function ProviderCard({
   id,
   name,
@@ -113,7 +128,7 @@ export default function ProviderCard({
   languages,
   pricingNote,
   isFeatured,
-  isPro,
+  subscriptionTier,
   isVerified,
   locale,
 }: ProviderCardProps) {
@@ -165,9 +180,9 @@ export default function ProviderCard({
             <h2 className="truncate text-[16px] font-semibold leading-6 text-gray-900">
               {name}
             </h2>
-            {isPro ? (
-              <span className="rounded bg-orange-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
-                PRO
+            {getTierBadge(subscriptionTier) ? (
+              <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold leading-none ${getTierBadge(subscriptionTier)!.className}`}>
+                {getTierBadge(subscriptionTier)!.label}
               </span>
             ) : null}
             {isVerified ? (

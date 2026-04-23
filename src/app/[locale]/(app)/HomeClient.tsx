@@ -29,13 +29,14 @@ const CATEGORY_TILES = [
   { label: 'View All →', gradient: 'from-orange-100 to-orange-200', accent: true  },
 ] as const
 
-interface ProviderProfileWithUser extends ProviderProfile {
+export interface ProviderProfileWithUser extends ProviderProfile {
   users: User | null
 }
 
 interface HomeClientProps {
   locale: string
   providers: ProviderProfileWithUser[]
+  featuredProviders: ProviderProfileWithUser[]
 }
 
 function SearchIcon() {
@@ -81,7 +82,11 @@ function getFilteredProviders(
   }
 }
 
-export default function HomeClient({ locale, providers }: HomeClientProps) {
+export default function HomeClient({
+  locale,
+  providers,
+  featuredProviders,
+}: HomeClientProps) {
   const router = useRouter()
   const [query, setQuery] = useState('')
   const [activeFilter, setActiveFilter] =
@@ -120,6 +125,57 @@ export default function HomeClient({ locale, providers }: HomeClientProps) {
           </button>
         </form>
       </section>
+
+      {featuredProviders.length > 0 ? (
+        <>
+          <h2 className="px-4 pt-2 pb-2 text-base font-bold text-gray-900">
+            Featured Providers
+          </h2>
+          <div className="overflow-x-auto px-4 pb-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-3">
+              {featuredProviders.map((provider) => (
+                <article
+                  key={provider.id}
+                  className="w-56 shrink-0 overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm"
+                >
+                  <div className="relative h-36 w-full bg-gray-100">
+                    {provider.users?.avatar_url ? (
+                      <Image
+                        src={provider.users.avatar_url}
+                        alt={getProviderName(provider)}
+                        fill
+                        sizes="224px"
+                        className="object-cover"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="p-3">
+                    <span className="inline-block rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white">
+                      Featured
+                    </span>
+                    <p className="mt-2 truncate text-sm font-semibold text-gray-900">
+                      {getProviderName(provider)}
+                    </p>
+                    <p className="truncate text-xs text-gray-500">
+                      {getProviderCategory(provider)}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-700">
+                      <span aria-hidden="true">★</span>{' '}
+                      {provider.avg_rating.toFixed(1)}
+                    </p>
+                    <Link
+                      href={`/${locale}/chat?provider=${provider.id}`}
+                      className="mt-3 block rounded-lg bg-orange-500 py-2 text-center text-xs font-medium text-white hover:bg-orange-600"
+                    >
+                      Chat
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : null}
 
       {/* Hot Services */}
       <h2 className="px-4 pt-2 pb-2 text-base font-bold text-gray-900">

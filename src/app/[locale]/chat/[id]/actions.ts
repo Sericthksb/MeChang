@@ -2,13 +2,27 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import type { Chat } from '@/types/database'
+import type { Chat, SubscriptionTier } from '@/types/database'
 
 type MessageType = 'text' | 'image' | 'video' | 'file' | 'location'
+
+const TIER_LEAD_LIMITS: Record<SubscriptionTier, number> = {
+  free: 3,
+  starter: 15,
+  growth: 40,
+  pro: Number.POSITIVE_INFINITY,
+}
 
 interface ProviderJobsRow {
   id: string
   jobs_done: number
+}
+
+interface ProviderLeadLimitRow {
+  id: string
+  subscription_tier: SubscriptionTier
+  monthly_lead_count: number
+  lead_count_reset_at: string
 }
 
 export async function sendMessage(
@@ -46,6 +60,52 @@ export async function sendMessage(
   }
 
   if (!chat.lead_fee_charged && chat.customer_id === user.id) {
+    const { data: providerProfileData, error: providerProfileError } =
+      await supabase
+        .from('provider_profiles')
+        .select('id, subscription_tier, monthly_lead_count, lead_count_reset_at')
+        .eq('user_id', chat.provider_id)
+        .single()
+
+    if (providerProfileError || !providerProfileData) {
+      return {
+        error:
+          providerProfileError?.message ?? 'Provider profile not found',
+      }
+    }
+
+    const providerProfile = providerProfileData as ProviderLeadLimitRow
+    const now = new Date()
+    const resetAt = new Date(providerProfile.lead_count_reset_at)
+    const needsMonthlyReset =
+      resetAt.getUTCFullYear() !== now.getUTCFullYear() ||
+      resetAt.getUTCMonth() !== now.getUTCMonth()
+
+    const currentLeadCount = needsMonthlyReset
+      ? 0
+      : providerProfile.monthly_lead_count
+    const limit = TIER_LEAD_LIMITS[providerProfile.subscription_tier]
+
+    if (currentLeadCount >= limit) {
+      return { error: 'This provider has reached their monthly lead limit' }
+    }
+
+    const leadUpdatePayload = {
+      monthly_lead_count: currentLeadCount + 1,
+      lead_count_reset_at: needsMonthlyReset
+        ? now.toISOString()
+        : providerProfile.lead_count_reset_at,
+    }
+
+    const { error: leadCountError } = await supabase
+      .from('provider_profiles')
+      .update(leadUpdatePayload)
+      .eq('id', providerProfile.id)
+
+    if (leadCountError) {
+      return { error: leadCountError.message }
+    }
+
     const { error: feeError } = await supabase
       .from('chats')
       .update({ lead_fee_charged: true })

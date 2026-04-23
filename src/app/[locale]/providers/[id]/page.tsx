@@ -137,7 +137,7 @@ export default async function ProviderProfilePage({
   const providerName = provider.users?.full_name ?? 'Unnamed Provider'
   const coverPhotoUrl = provider.provider_photos[0]?.url ?? null
   const avatarUrl = provider.users?.avatar_url ?? null
-  const isPro = provider.subscription_tier === 'paid'
+  const subscriptionTier = provider.subscription_tier
   const isVerified = provider.users?.id_verified === true
   const isCertified = provider.is_certified
 
@@ -177,9 +177,17 @@ export default async function ProviderProfilePage({
         <h1 className="text-xl font-bold text-gray-900">{providerName}</h1>
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          {isPro ? (
-            <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs font-bold text-white">
+          {subscriptionTier === 'pro' ? (
+            <span className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
               Pro
+            </span>
+          ) : subscriptionTier === 'growth' ? (
+            <span className="rounded-full bg-blue-500 px-2 py-0.5 text-xs font-bold text-white">
+              Growth
+            </span>
+          ) : subscriptionTier === 'starter' ? (
+            <span className="rounded-full bg-gray-400 px-2 py-0.5 text-xs font-bold text-white">
+              Starter
             </span>
           ) : null}
           {isVerified ? (

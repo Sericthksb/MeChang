@@ -30,5 +30,32 @@
     "chat": "Chat",
     "save": "Save",
     "rating": "Rating"
+  },
+  "pricing": {
+    "title": "Pricing Plans",
+    "subtitle": "Choose the best plan for your service business.",
+    "getStarted": "Get Started",
+    "freeTitle": "Free",
+    "freePrice": "฿0",
+    "freeFeature1": "3 leads / month",
+    "freeFeature2": "3 photos",
+    "freeFeature3": "no video",
+    "freeFeature4": "no support",
+    "starterTitle": "Starter",
+    "starterPrice": "฿199",
+    "starterFeature1": "15 leads / month",
+    "starterFeature2": "5 photos + video",
+    "starterFeature3": "Email support",
+    "growthTitle": "Growth",
+    "growthPrice": "฿499",
+    "growthFeature1": "40 leads / month",
+    "growthFeature2": "10 photos + video",
+    "growthFeature3": "LINE support",
+    "proTitle": "Pro",
+    "proPrice": "฿990",
+    "proFeature1": "Unlimited leads",
+    "proFeature2": "Unlimited photos + video",
+    "proFeature3": "LINE priority + Hotline",
+    "footerNote": "All plans include a free Verified badge — submit your work certificate to apply."
   }
 }
