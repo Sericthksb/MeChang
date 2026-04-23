@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import ProfileClient from './ProfileClient'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import type {
   Certification,
   ProviderPhoto,
@@ -111,7 +111,7 @@ export default async function ProviderProfilePage({
   params: Promise<{ locale: string; id: string }>
 }) {
   const { locale, id } = await params
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data, error } = await supabase
     .from('provider_profiles')
