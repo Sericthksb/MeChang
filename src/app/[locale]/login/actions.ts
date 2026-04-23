@@ -5,12 +5,25 @@ import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import type { UserRole } from '@/types/database'
 
+function resolveRedirectPath(locale: string, redirectTo: string | null) {
+  if (!redirectTo || !redirectTo.startsWith('/')) {
+    return `/${locale}`
+  }
+
+  if (redirectTo.startsWith(`/${locale}/`) || redirectTo === `/${locale}`) {
+    return redirectTo
+  }
+
+  return `/${locale}${redirectTo}`
+}
+
 export async function signIn(
   formData: FormData
 ): Promise<{ error: string } | void> {
   const email = (formData.get('email') as string | null)?.trim()
   const password = formData.get('password') as string | null
   const locale = (formData.get('locale') as string | null) ?? 'en'
+  const redirectTo = (formData.get('redirect') as string | null) ?? null
 
   if (!email || !password) {
     return { error: 'Email and password are required' }
@@ -23,7 +36,7 @@ export async function signIn(
     return { error: error.message }
   }
 
-  redirect(`/${locale}`)
+  redirect(resolveRedirectPath(locale, redirectTo))
 }
 
 export async function signUp(
@@ -33,6 +46,7 @@ export async function signUp(
   const password = formData.get('password') as string | null
   const role = ((formData.get('role') as string | null) ?? 'customer') as UserRole
   const locale = (formData.get('locale') as string | null) ?? 'en'
+  const redirectTo = (formData.get('redirect') as string | null) ?? null
 
   if (!email || !password) {
     return { error: 'Email and password are required' }
@@ -57,5 +71,5 @@ export async function signUp(
       .eq('id', data.user.id)
   }
 
-  redirect(`/${locale}`)
+  redirect(resolveRedirectPath(locale, redirectTo))
 }

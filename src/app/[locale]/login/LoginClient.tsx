@@ -9,6 +9,7 @@ type AuthMode = 'signin' | 'signup'
 
 interface LoginClientProps {
   locale: string
+  redirectTo: string
 }
 
 function GoogleIcon() {
@@ -42,7 +43,7 @@ function FacebookIcon() {
   )
 }
 
-export default function LoginClient({ locale }: LoginClientProps) {
+export default function LoginClient({ locale, redirectTo }: LoginClientProps) {
   const [activeTab, setActiveTab] = useState<Tab>('customer')
   const [authMode, setAuthMode] = useState<AuthMode>('signin')
   const [loading, setLoading] = useState(false)
@@ -57,6 +58,7 @@ export default function LoginClient({ locale }: LoginClientProps) {
     const formData = new FormData(event.currentTarget)
     formData.set('locale', locale)
     formData.set('role', activeTab)
+    formData.set('redirect', redirectTo)
 
     const result =
       authMode === 'signin' ? await signIn(formData) : await signUp(formData)
@@ -74,10 +76,13 @@ export default function LoginClient({ locale }: LoginClientProps) {
   async function handleOAuth(provider: 'google' | 'facebook') {
     setLoading(true)
     setError('')
+    const callbackUrl = new URL('/api/auth/callback', window.location.origin)
+    callbackUrl.searchParams.set('next', redirectTo)
+
     const supabase = createClient()
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+      options: { redirectTo: callbackUrl.toString() },
     })
     if (oauthError) {
       setError(oauthError.message)
@@ -130,6 +135,7 @@ export default function LoginClient({ locale }: LoginClientProps) {
 
       {/* Email/password form */}
       <form onSubmit={handleSubmit} className="space-y-3">
+        <input name="redirect" type="hidden" value={redirectTo} />
         <input
           name="email"
           type="email"
