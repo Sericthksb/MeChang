@@ -1,0 +1,45 @@
+{
+  "name": "mechang",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.57.4",
+    "next": "15.5.15",
+    "next-intl": "^3.26.5",
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^5.0.4",
+    "eslint": "9.39.4",
+    "eslint-config-next": "15.5.15",
+    "jsdom": "^27.0.1",
+    "postcss": "^8",
+    "supabase": "^2.53.11",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
+  },
+  "vitest": {
+    "environment": "jsdom",
+    "setupFiles": [
+      "src/__tests__/setup.ts"
+    ],
+    "globals": true
+  }
+}

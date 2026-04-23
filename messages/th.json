@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "home": "หน้าหลัก",
+    "explore": "สำรวจ",
+    "profile": "โปรไฟล์",
+    "login": "เข้าสู่ระบบ",
+    "dashboard": "แดชบอร์ด",
+    "chat": "แชท",
+    "saved": "บันทึกไว้"
+  },
+  "login": {
+    "title": "ยินดีต้อนรับสู่ MeChang",
+    "subtitle": "ค้นหาบริการที่น่าเชื่อถือในภูเก็ต",
+    "tabBuyer": "ฉันต้องการบริการ",
+    "tabProvider": "ฉันเป็นผู้ให้บริการ",
+    "emailPlaceholder": "อีเมล",
+    "passwordPlaceholder": "รหัสผ่าน",
+    "signIn": "เข้าสู่ระบบ",
+    "createAccount": "สมัครสมาชิก",
+    "noAccount": "ยังไม่มีบัญชี?",
+    "haveAccount": "มีบัญชีแล้ว?",
+    "orContinueWith": "หรือเข้าสู่ระบบด้วย",
+    "checkEmail": "ตรวจสอบอีเมลเพื่อยืนยันบัญชีของคุณ"
+  },
+  "common": {
+    "loading": "กำลังโหลด...",
+    "error": "เกิดข้อผิดพลาด",
+    "verified": "ยืนยันแล้ว",
+    "featured": "แนะนำ",
+    "chat": "แชท",
+    "save": "บันทึก",
+    "rating": "คะแนน"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "profile": "Profile",
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "chat": "Chat",
+    "saved": "Saved"
+  },
+  "login": {
+    "title": "Welcome to MeChang",
+    "subtitle": "Find trusted services in Phuket",
+    "tabBuyer": "I Need a Service",
+    "tabProvider": "I'm a Provider",
+    "emailPlaceholder": "Email address",
+    "passwordPlaceholder": "Password",
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "orContinueWith": "or continue with",
+    "checkEmail": "Check your email to confirm your account."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "verified": "Verified",
+    "featured": "Featured",
+    "chat": "Chat",
+    "save": "Save",
+    "rating": "Rating"
+  }
+}
