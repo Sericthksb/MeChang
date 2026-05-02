@@ -8,90 +8,60 @@ function revalidateVerification() {
   revalidatePath('/th/admin/verification')
 }
 
-export async function approveId(
-  userId: string
-): Promise<{ error: string } | void> {
+export async function approveId(userId: string, _formData: FormData): Promise<void> {
   const supabase = createServiceClient()
-  const { error } = await supabase
-    .from('users')
-    .update({ id_verified: true })
-    .eq('id', userId)
-
-  if (error) {
-    return { error: error.message }
-  }
-
+  await supabase.from('users').update({ id_verified: true }).eq('id', userId)
   revalidateVerification()
 }
 
-export async function rejectId(
-  userId: string
-): Promise<{ error: string } | void> {
+export async function rejectId(userId: string, _formData: FormData): Promise<void> {
   const supabase = createServiceClient()
-  const { error } = await supabase
+  await supabase
     .from('users')
     .update({ id_verified: false, id_document_url: null })
     .eq('id', userId)
-
-  if (error) {
-    return { error: error.message }
-  }
-
   revalidateVerification()
 }
 
 export async function approveCert(
   certId: string,
   providerId: string,
-  adminUserId: string
-): Promise<{ error: string } | void> {
+  adminUserId: string,
+  _formData: FormData
+): Promise<void> {
   const supabase = createServiceClient()
   const reviewedAt = new Date().toISOString()
 
-  const { error: certError } = await supabase
+  await supabase
     .from('certifications')
     .update({
       status: 'approved',
       verified: true,
       reviewed_at: reviewedAt,
-      reviewed_by: adminUserId,
+      ...(adminUserId ? { reviewed_by: adminUserId } : {}),
     })
     .eq('id', certId)
 
-  if (certError) {
-    return { error: certError.message }
-  }
-
-  const { error: profileError } = await supabase
-    .from('provider_profiles')
-    .update({ is_certified: true })
-    .eq('id', providerId)
-
-  if (profileError) {
-    return { error: profileError.message }
-  }
+  await supabase.from('provider_profiles').update({ is_certified: true }).eq('id', providerId)
 
   revalidateVerification()
 }
 
 export async function rejectCert(
   certId: string,
-  adminUserId: string
-): Promise<{ error: string } | void> {
+  adminUserId: string,
+  _formData: FormData
+): Promise<void> {
   const supabase = createServiceClient()
-  const { error } = await supabase
+  await supabase
     .from('certifications')
     .update({
       status: 'rejected',
       verified: false,
       reviewed_at: new Date().toISOString(),
-      reviewed_by: adminUserId,
+      ...(adminUserId ? { reviewed_by: adminUserId } : {}),
     })
     .eq('id', certId)
-
-  if (error) {
-    return { error: error.message }
-  }
 
   revalidateVerification()
 }

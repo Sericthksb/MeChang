@@ -9,26 +9,26 @@ interface VerificationPageProps {
   params: Promise<{ locale: string }>
 }
 
-interface IdQueueUser
-  extends Pick<User, 'id' | 'full_name' | 'id_document_url'> {}
+interface IdQueueUser extends Pick<User, 'id' | 'full_name' | 'id_document_url'> {
+  signedUrl: string | null
+}
 
-interface PendingCertification
-  extends Pick<Certification, 'id' | 'provider_id' | 'title' | 'document_url'> {}
+interface PendingCertification extends Pick<Certification, 'id' | 'provider_id' | 'title' | 'document_url'> {
+  signedUrl: string | null
+}
 
 interface VerificationProvider extends Pick<ProviderProfile, 'id' | 'user_id'> {}
-
 interface VerificationUser extends Pick<User, 'id' | 'full_name'> {}
 
-export default async function AdminVerificationPage({
-  params,
-}: VerificationPageProps) {
+const SIGNED_URL_EXPIRY = 60 * 60 // 1 hour
+
+export default async function AdminVerificationPage({ params }: VerificationPageProps) {
   const { locale } = await params
   const authClient = await createClient()
-  const {
-    data: { user: adminUser },
-  } = await authClient.auth.getUser()
+  const { data: { user: adminUser } } = await authClient.auth.getUser()
   const supabase = createServiceClient()
 
+  // Fetch pending ID queue
   const { data: idQueueData } = await supabase
     .from('users')
     .select('id, full_name, id_document_url')
@@ -36,45 +36,62 @@ export default async function AdminVerificationPage({
     .eq('id_verified', false)
     .order('created_at', { ascending: false })
 
+  // Generate signed URLs for ID documents
+  const idQueue: IdQueueUser[] = await Promise.all(
+    (idQueueData ?? []).map(async (u) => {
+      if (!u.id_document_url) return { ...u, signedUrl: null }
+      const { data } = await supabase.storage
+        .from('id-documents')
+        .createSignedUrl(u.id_document_url, SIGNED_URL_EXPIRY)
+      return { ...u, signedUrl: data?.signedUrl ?? null }
+    })
+  )
+
+  // Fetch pending certifications
   const { data: pendingCertsData, error: pendingCertsError } = await supabase
     .from('certifications')
     .select('id, provider_id, title, document_url')
     .eq('status', 'pending')
     .order('issued_date', { ascending: false, nullsFirst: false })
 
-  const idQueue = (idQueueData ?? []) as IdQueueUser[]
+  const rawCerts = pendingCertsError ? [] : (pendingCertsData ?? [])
+
+  // Generate signed URLs for cert documents
+  const pendingCerts: PendingCertification[] = await Promise.all(
+    rawCerts.map(async (c) => {
+      if (!c.document_url) return { ...c, signedUrl: null }
+      const { data } = await supabase.storage
+        .from('certifications')
+        .createSignedUrl(c.document_url, SIGNED_URL_EXPIRY)
+      return { ...c, signedUrl: data?.signedUrl ?? null }
+    })
+  )
+
   const pendingIdCount = idQueue.length
-  const pendingCerts = pendingCertsError
-    ? []
-    : ((pendingCertsData ?? []) as PendingCertification[])
   const pendingCertCount = pendingCerts.length
   const providerIds = pendingCerts.map((cert) => cert.provider_id)
 
   const { data: providerRows } =
     providerIds.length > 0
-      ? await supabase
-          .from('provider_profiles')
-          .select('id, user_id')
-          .in('id', providerIds)
+      ? await supabase.from('provider_profiles').select('id, user_id').in('id', providerIds)
       : { data: [] as VerificationProvider[] }
 
   const verificationProviders = (providerRows ?? []) as VerificationProvider[]
-  const providerUserIds = verificationProviders.map((provider) => provider.user_id)
+  const providerUserIds = verificationProviders.map((p) => p.user_id)
 
   const { data: providerUsers } =
     providerUserIds.length > 0
-      ? await supabase
-          .from('users')
-          .select('id, full_name')
-          .in('id', providerUserIds)
+      ? await supabase.from('users').select('id, full_name').in('id', providerUserIds)
       : { data: [] as VerificationUser[] }
 
   const providerMap = new Map<string, VerificationProvider>(
-    verificationProviders.map((provider) => [provider.id, provider])
+    verificationProviders.map((p) => [p.id, p])
   )
   const providerUserMap = new Map<string, VerificationUser>(
-    ((providerUsers ?? []) as VerificationUser[]).map((row) => [row.id, row])
+    ((providerUsers ?? []) as VerificationUser[]).map((u) => [u.id, u])
   )
+
+  const adminId = adminUser?.id ?? ''
 
   return (
     <div>
@@ -88,6 +105,7 @@ export default async function AdminVerificationPage({
       />
 
       <div className="space-y-6">
+        {/* ID Queue */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div>
@@ -112,10 +130,7 @@ export default async function AdminVerificationPage({
               <tbody>
                 {idQueue.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={4}
-                      className="px-3 py-8 text-center text-gray-500"
-                    >
+                    <td colSpan={4} className="px-3 py-8 text-center text-gray-500">
                       No pending ID reviews.
                     </td>
                   </tr>
@@ -129,23 +144,22 @@ export default async function AdminVerificationPage({
                         <AdminBadge variant="pending" />
                       </td>
                       <td className="px-3 py-4">
-                        <a
-                          href={queueUser.id_document_url ?? '#'}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-orange-600 hover:text-orange-700"
-                        >
-                          View document
-                        </a>
+                        {queueUser.signedUrl ? (
+                          <a
+                            href={queueUser.signedUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-orange-600 hover:text-orange-700"
+                          >
+                            View document
+                          </a>
+                        ) : (
+                          <span className="text-gray-400">No document</span>
+                        )}
                       </td>
                       <td className="px-3 py-4">
                         <div className="flex flex-wrap gap-2">
-                          <form
-                            action={async () => {
-                              'use server'
-                              await approveId(queueUser.id)
-                            }}
-                          >
+                          <form action={approveId.bind(null, queueUser.id)}>
                             <button
                               type="submit"
                               className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
@@ -153,12 +167,7 @@ export default async function AdminVerificationPage({
                               Approve
                             </button>
                           </form>
-                          <form
-                            action={async () => {
-                              'use server'
-                              await rejectId(queueUser.id)
-                            }}
-                          >
+                          <form action={rejectId.bind(null, queueUser.id)}>
                             <button
                               type="submit"
                               className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
@@ -176,20 +185,16 @@ export default async function AdminVerificationPage({
           </div>
         </div>
 
+        {/* Certifications Queue */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Certifications Queue
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900">Certifications Queue</h2>
               <p className="mt-1 text-sm text-gray-500">
                 Approve supporting credentials for certified provider badges.
               </p>
             </div>
-            <AdminBadge
-              variant="pending"
-              label={`${pendingCertCount} pending`}
-            />
+            <AdminBadge variant="pending" label={`${pendingCertCount} pending`} />
           </div>
 
           <div className="overflow-x-auto">
@@ -206,19 +211,14 @@ export default async function AdminVerificationPage({
               <tbody>
                 {pendingCerts.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={5}
-                      className="px-3 py-8 text-center text-gray-500"
-                    >
+                    <td colSpan={5} className="px-3 py-8 text-center text-gray-500">
                       No pending certification reviews.
                     </td>
                   </tr>
                 ) : (
                   pendingCerts.map((cert) => {
                     const provider = providerMap.get(cert.provider_id)
-                    const providerUser = provider
-                      ? providerUserMap.get(provider.user_id)
-                      : null
+                    const providerUser = provider ? providerUserMap.get(provider.user_id) : null
 
                     return (
                       <tr key={cert.id} className="border-b border-gray-100">
@@ -228,31 +228,24 @@ export default async function AdminVerificationPage({
                         <td className="px-3 py-4">
                           <AdminBadge variant="pending" />
                         </td>
-                        <td className="px-3 py-4 text-gray-600">
-                          {cert.title}
-                        </td>
+                        <td className="px-3 py-4 text-gray-600">{cert.title}</td>
                         <td className="px-3 py-4">
-                          <a
-                            href={cert.document_url ?? '#'}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-orange-600 hover:text-orange-700"
-                          >
-                            View document
-                          </a>
+                          {cert.signedUrl ? (
+                            <a
+                              href={cert.signedUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-orange-600 hover:text-orange-700"
+                            >
+                              View document
+                            </a>
+                          ) : (
+                            <span className="text-gray-400">No document</span>
+                          )}
                         </td>
                         <td className="px-3 py-4">
                           <div className="flex flex-wrap gap-2">
-                            <form
-                              action={async () => {
-                                'use server'
-                                await approveCert(
-                                  cert.id,
-                                  cert.provider_id,
-                                  adminUser?.id ?? ''
-                                )
-                              }}
-                            >
+                            <form action={approveCert.bind(null, cert.id, cert.provider_id, adminId)}>
                               <button
                                 type="submit"
                                 className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
@@ -260,12 +253,7 @@ export default async function AdminVerificationPage({
                                 Approve
                               </button>
                             </form>
-                            <form
-                              action={async () => {
-                                'use server'
-                                await rejectCert(cert.id, adminUser?.id ?? '')
-                              }}
-                            >
+                            <form action={rejectCert.bind(null, cert.id, adminId)}>
                               <button
                                 type="submit"
                                 className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
