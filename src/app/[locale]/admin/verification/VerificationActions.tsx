@@ -18,6 +18,7 @@ export function IdActions({ userId, onSuccess }: { userId: string } & ActionProp
     startTransition(async () => {
       const result = await approveId(userId)
       if (result?.error) { setError(result.error); return }
+      onSuccess?.()
       router.refresh()
     })
   }
