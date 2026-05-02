@@ -9,10 +9,12 @@ function revalidateVerification() {
   revalidatePath('/th/admin/verification')
 }
 
-export async function approveId(userId: string): Promise<void> {
+export async function approveId(userId: string): Promise<{ error: string } | null> {
   const supabase = createServiceClient()
-  await supabase.from('users').update({ id_verified: true }).eq('id', userId)
+  const { error } = await supabase.from('users').update({ id_verified: true }).eq('id', userId)
+  if (error) return { error: error.message }
   revalidateVerification()
+  return null
 }
 
 export async function rejectId(userId: string): Promise<void> {

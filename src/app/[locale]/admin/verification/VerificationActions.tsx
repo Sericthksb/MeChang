@@ -1,21 +1,25 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { approveId, rejectId, approveCert, rejectCert } from './actions'
 
 export function IdActions({ userId }: { userId: string }) {
   const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   function handleApprove() {
+    setError(null)
     startTransition(async () => {
-      await approveId(userId)
+      const result = await approveId(userId)
+      if (result?.error) { setError(result.error); return }
       router.refresh()
     })
   }
 
   function handleReject() {
+    setError(null)
     startTransition(async () => {
       await rejectId(userId)
       router.refresh()
@@ -23,7 +27,8 @@ export function IdActions({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
+      {error && <span className="text-xs text-red-600">{error}</span>}
       <button
         disabled={pending}
         onClick={handleApprove}
