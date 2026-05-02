@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 interface NavDrawerProps {
   locale: string
@@ -188,6 +189,13 @@ export default function NavDrawer({ locale, isLoggedIn }: NavDrawerProps) {
           ))}
           <ComingSoonRow item={{ label: 'Earnings', emoji: '💰' }} />
         </nav>
+
+        <div className="border-t border-gray-100 px-4 py-4">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
+            Language
+          </p>
+          <LanguageSwitcher />
+        </div>
       </div>
     </>
   )

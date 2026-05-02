@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
-import LanguageSwitcher from '@/components/LanguageSwitcher'
 import NavDrawer from '@/components/NavDrawer'
 
 interface HeaderProps {
@@ -24,7 +23,6 @@ export default async function Header({ locale }: HeaderProps) {
         <NavDrawer locale={locale} isLoggedIn={!!user} />
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <LanguageSwitcher />
           <Link
             href={actionHref}
             className={
