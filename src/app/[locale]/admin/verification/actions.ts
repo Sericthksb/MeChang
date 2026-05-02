@@ -4,28 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createClient } from '@/lib/supabase/server'
 
-function decodeServiceKeyMeta() {
-  const token = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!token) return { role: 'missing', ref: 'missing' }
-
-  try {
-    const [, payload] = token.split('.')
-    if (!payload) return { role: 'invalid', ref: 'invalid' }
-
-    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
-      role?: string
-      ref?: string
-    }
-
-    return {
-      role: decoded.role ?? 'unknown',
-      ref: decoded.ref ?? 'unknown',
-    }
-  } catch {
-    return { role: 'decode-failed', ref: 'decode-failed' }
-  }
-}
-
 function revalidateVerification() {
   revalidatePath('/en/admin/verification')
   revalidatePath('/th/admin/verification')
@@ -34,41 +12,21 @@ function revalidateVerification() {
 export async function approveId(userId: string): Promise<{ error: string } | null> {
   const supabase = createServiceClient()
 
-  const { data: beforeUser, error: beforeError } = await supabase
-    .from('users')
-    .select('id, id_verified, id_document_url')
-    .eq('id', userId)
-    .single()
-
-  if (beforeError) return { error: `ID approve precheck failed: ${beforeError.message}` }
-
-  const { data: updatedRows, error } = await supabase
+  const { error } = await supabase
     .from('users')
     .update({ id_verified: true })
     .eq('id', userId)
-    .select('id, id_verified, id_document_url')
 
   if (error) return { error: error.message }
 
-  const { data: updatedUser, error: verifyError } = await supabase
+  const { data: verified, error: verifyError } = await supabase
     .from('users')
-    .select('id, id_verified, id_document_url')
+    .select('id_verified')
     .eq('id', userId)
     .single()
 
   if (verifyError) return { error: verifyError.message }
-  if (!updatedUser.id_verified) {
-    const updatedRow = updatedRows?.[0]
-    const serviceKey = decodeServiceKeyMeta()
-    return {
-      error:
-        `ID approval mismatch: before=${beforeUser.id_verified}, ` +
-        `updated=${updatedRow?.id_verified ?? 'none'}, ` +
-        `after=${updatedUser.id_verified}, ` +
-        `doc=${updatedUser.id_document_url ? 'present' : 'missing'}, ` +
-        `role=${serviceKey.role}, ref=${serviceKey.ref}`,
-    }
-  }
+  if (!verified.id_verified) return { error: 'ID approval did not persist — please try again.' }
 
   revalidateVerification()
   return null
