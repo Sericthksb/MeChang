@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/service'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import AdminStatCard from '@/components/admin/AdminStatCard'
+import { getPendingVerificationCounts } from '@/lib/admin/verification'
 
 export default async function AdminDashboardPage({
   params,
@@ -10,10 +11,10 @@ export default async function AdminDashboardPage({
 }) {
   const { locale } = await params
   const supabase = createServiceClient()
+  const pendingVerificationPromise = getPendingVerificationCounts()
 
   const [
     { count: totalProviders },
-    { count: pendingVerifications },
     { count: totalUsers },
     { count: totalReviews },
   ] = await Promise.all([
@@ -21,13 +22,12 @@ export default async function AdminDashboardPage({
       .from('provider_profiles')
       .select('id', { count: 'exact', head: true })
       .eq('is_active', true),
-    supabase
-      .from('certifications')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'pending'),
     supabase.from('users').select('id', { count: 'exact', head: true }),
     supabase.from('reviews').select('id', { count: 'exact', head: true }),
   ])
+
+  const { pendingIds, pendingCerts } = await pendingVerificationPromise
+  const pendingVerifications = pendingIds + pendingCerts
 
   const [newUsers, newReviews, newCerts] = await Promise.all([
     supabase

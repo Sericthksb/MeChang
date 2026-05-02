@@ -11,8 +11,24 @@ function revalidateVerification() {
 
 export async function approveId(userId: string): Promise<{ error: string } | null> {
   const supabase = createServiceClient()
-  const { error } = await supabase.from('users').update({ id_verified: true }).eq('id', userId)
+  const { error } = await supabase
+    .from('users')
+    .update({ id_verified: true })
+    .eq('id', userId)
+
   if (error) return { error: error.message }
+
+  const { data: updatedUser, error: verifyError } = await supabase
+    .from('users')
+    .select('id_verified')
+    .eq('id', userId)
+    .single()
+
+  if (verifyError) return { error: verifyError.message }
+  if (!updatedUser.id_verified) {
+    return { error: 'ID approval did not persist in the database' }
+  }
+
   revalidateVerification()
   return null
 }

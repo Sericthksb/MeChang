@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import { getPendingVerificationCounts } from '@/lib/admin/verification'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -30,10 +31,8 @@ export default async function AdminLayout({
 
   if (userRow?.role !== 'admin') redirect(`/${locale}`)
 
-  const { count: pendingVerifications } = await service
-    .from('certifications')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'pending')
+  const { pendingIds, pendingCerts } = await getPendingVerificationCounts()
+  const pendingVerifications = pendingIds + pendingCerts
 
   return (
     <div className="flex min-h-screen bg-gray-50">
