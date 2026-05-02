@@ -1,4 +1,3 @@
-import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import AdminBadge from '@/components/admin/AdminBadge'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
@@ -24,8 +23,6 @@ const SIGNED_URL_EXPIRY = 60 * 60 // 1 hour
 
 export default async function AdminVerificationPage({ params }: VerificationPageProps) {
   const { locale } = await params
-  const authClient = await createClient()
-  const { data: { user: adminUser } } = await authClient.auth.getUser()
   const supabase = createServiceClient()
 
   // Fetch pending ID queue
@@ -90,8 +87,6 @@ export default async function AdminVerificationPage({ params }: VerificationPage
   const providerUserMap = new Map<string, VerificationUser>(
     ((providerUsers ?? []) as VerificationUser[]).map((u) => [u.id, u])
   )
-
-  const adminId = adminUser?.id ?? ''
 
   return (
     <div>
@@ -159,7 +154,8 @@ export default async function AdminVerificationPage({ params }: VerificationPage
                       </td>
                       <td className="px-3 py-4">
                         <div className="flex flex-wrap gap-2">
-                          <form action={approveId.bind(null, queueUser.id)}>
+                          <form action={approveId}>
+                            <input type="hidden" name="userId" value={queueUser.id} />
                             <button
                               type="submit"
                               className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
@@ -167,7 +163,8 @@ export default async function AdminVerificationPage({ params }: VerificationPage
                               Approve
                             </button>
                           </form>
-                          <form action={rejectId.bind(null, queueUser.id)}>
+                          <form action={rejectId}>
+                            <input type="hidden" name="userId" value={queueUser.id} />
                             <button
                               type="submit"
                               className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
@@ -245,7 +242,9 @@ export default async function AdminVerificationPage({ params }: VerificationPage
                         </td>
                         <td className="px-3 py-4">
                           <div className="flex flex-wrap gap-2">
-                            <form action={approveCert.bind(null, cert.id, cert.provider_id, adminId)}>
+                            <form action={approveCert}>
+                              <input type="hidden" name="certId" value={cert.id} />
+                              <input type="hidden" name="providerId" value={cert.provider_id} />
                               <button
                                 type="submit"
                                 className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
@@ -253,7 +252,8 @@ export default async function AdminVerificationPage({ params }: VerificationPage
                                 Approve
                               </button>
                             </form>
-                            <form action={rejectCert.bind(null, cert.id, adminId)}>
+                            <form action={rejectCert}>
+                              <input type="hidden" name="certId" value={cert.id} />
                               <button
                                 type="submit"
                                 className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
