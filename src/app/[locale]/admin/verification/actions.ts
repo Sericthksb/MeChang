@@ -17,21 +17,26 @@ export async function approveId(userId: string): Promise<{ error: string } | nul
   return null
 }
 
-export async function rejectId(userId: string): Promise<void> {
+export async function rejectId(userId: string): Promise<{ error: string } | null> {
   const supabase = createServiceClient()
-  await supabase
+  const { error } = await supabase
     .from('users')
     .update({ id_verified: false, id_document_url: null })
     .eq('id', userId)
+  if (error) return { error: error.message }
   revalidateVerification()
+  return null
 }
 
-export async function approveCert(certId: string, providerId: string): Promise<void> {
+export async function approveCert(
+  certId: string,
+  providerId: string
+): Promise<{ error: string } | null> {
   const authClient = await createClient()
   const { data: { user } } = await authClient.auth.getUser()
   const supabase = createServiceClient()
 
-  await supabase
+  const { error: certError } = await supabase
     .from('certifications')
     .update({
       status: 'approved',
@@ -41,16 +46,24 @@ export async function approveCert(certId: string, providerId: string): Promise<v
     })
     .eq('id', certId)
 
-  await supabase.from('provider_profiles').update({ is_certified: true }).eq('id', providerId)
+  if (certError) return { error: certError.message }
+
+  const { error: profileError } = await supabase
+    .from('provider_profiles')
+    .update({ is_certified: true })
+    .eq('id', providerId)
+
+  if (profileError) return { error: profileError.message }
   revalidateVerification()
+  return null
 }
 
-export async function rejectCert(certId: string): Promise<void> {
+export async function rejectCert(certId: string): Promise<{ error: string } | null> {
   const authClient = await createClient()
   const { data: { user } } = await authClient.auth.getUser()
   const supabase = createServiceClient()
 
-  await supabase
+  const { error } = await supabase
     .from('certifications')
     .update({
       status: 'rejected',
@@ -60,5 +73,7 @@ export async function rejectCert(certId: string): Promise<void> {
     })
     .eq('id', certId)
 
+  if (error) return { error: error.message }
   revalidateVerification()
+  return null
 }

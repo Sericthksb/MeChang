@@ -1,6 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+const noStoreFetch: typeof fetch = (input, init) => {
+  return fetch(input, {
+    ...init,
+    cache: 'no-store',
+  })
+}
+
 export async function createClient() {
   const cookieStore = await cookies()
 
@@ -21,6 +28,10 @@ export async function createClient() {
             // Server Component - cookies set in middleware instead
           }
         },
+      },
+      global: {
+        // Authenticated server-side Supabase reads should always bypass Next fetch caching.
+        fetch: noStoreFetch,
       },
     }
   )

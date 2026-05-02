@@ -4,7 +4,11 @@ import { useTransition, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { approveId, rejectId, approveCert, rejectCert } from './actions'
 
-export function IdActions({ userId }: { userId: string }) {
+interface ActionProps {
+  onSuccess?: () => void
+}
+
+export function IdActions({ userId, onSuccess }: { userId: string } & ActionProps) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -21,7 +25,9 @@ export function IdActions({ userId }: { userId: string }) {
   function handleReject() {
     setError(null)
     startTransition(async () => {
-      await rejectId(userId)
+      const result = await rejectId(userId)
+      if (result?.error) { setError(result.error); return }
+      onSuccess?.()
       router.refresh()
     })
   }
@@ -47,26 +53,38 @@ export function IdActions({ userId }: { userId: string }) {
   )
 }
 
-export function CertActions({ certId, providerId }: { certId: string; providerId: string }) {
+export function CertActions({
+  certId,
+  providerId,
+  onSuccess,
+}: { certId: string; providerId: string } & ActionProps) {
   const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   function handleApprove() {
+    setError(null)
     startTransition(async () => {
-      await approveCert(certId, providerId)
+      const result = await approveCert(certId, providerId)
+      if (result?.error) { setError(result.error); return }
+      onSuccess?.()
       router.refresh()
     })
   }
 
   function handleReject() {
+    setError(null)
     startTransition(async () => {
-      await rejectCert(certId)
+      const result = await rejectCert(certId)
+      if (result?.error) { setError(result.error); return }
+      onSuccess?.()
       router.refresh()
     })
   }
 
   return (
     <div className="flex flex-wrap gap-2">
+      {error && <span className="text-xs text-red-600">{error}</span>}
       <button
         disabled={pending}
         onClick={handleApprove}
