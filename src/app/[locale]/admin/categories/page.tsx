@@ -6,6 +6,7 @@ import {
   renameCategory,
 } from './actions'
 import { createServiceClient } from '@/lib/supabase/service'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import type { Service } from '@/types/database'
 
 interface CategoriesPageProps {
@@ -113,14 +114,13 @@ export default async function AdminCategoriesPage({
   }
 
   return (
-    <main className="space-y-4">
-      <section className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Categories</h2>
-          <p className="text-sm text-gray-500">
-            Manage parent and child service categories.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        breadcrumbs={[{ label: 'Admin', href: `/${locale}/admin/dashboard` }, { label: 'Categories' }]}
+        title="Categories"
+        subtitle={`${services.length} categories`}
+      />
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
 
         {notice ? (
           <p className="mb-4 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700">
@@ -159,9 +159,9 @@ export default async function AdminCategoriesPage({
             )
           })}
         </div>
-      </section>
+      </div>
 
-      <section className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h3 className="text-lg font-bold text-gray-900">Add Category</h3>
         <form action={handleAddCategory} className="mt-4 grid gap-3 sm:grid-cols-2">
           <input
@@ -205,8 +205,8 @@ export default async function AdminCategoriesPage({
             </button>
           </div>
         </form>
-      </section>
-    </main>
+      </div>
+    </div>
   )
 }
 

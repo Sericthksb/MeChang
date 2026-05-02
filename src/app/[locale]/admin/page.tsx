@@ -6,6 +6,5 @@ export default async function AdminPage({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-
-  redirect(`/${locale}/admin/providers`)
+  redirect(`/${locale}/admin/dashboard`)
 }

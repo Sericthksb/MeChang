@@ -23,6 +23,7 @@ export interface User {
   postal_code: string | null
   id_verified: boolean
   id_document_url: string | null
+  is_banned: boolean
   created_at: string
 }
 
@@ -163,4 +164,12 @@ export interface Transaction {
 
 export interface ProviderWithProfile extends User {
   provider_profiles: ProviderProfile
+}
+
+export interface PlatformSettings {
+  id: string
+  lead_fee_satang: number
+  featured_slot_limit: number
+  platform_active: boolean
+  updated_at: string
 }

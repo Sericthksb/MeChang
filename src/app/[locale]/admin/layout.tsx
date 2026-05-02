@@ -1,22 +1,12 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 
 interface AdminLayoutProps {
   children: React.ReactNode
   params: Promise<{ locale: string }>
 }
-
-interface AdminUserRow {
-  role: 'customer' | 'provider' | 'admin'
-}
-
-const tabs = [
-  { href: 'providers', label: 'Providers' },
-  { href: 'categories', label: 'Categories' },
-  { href: 'verification', label: 'Verification' },
-  { href: 'reviews', label: 'Reviews' },
-]
 
 export default async function AdminLayout({
   children,
@@ -28,46 +18,31 @@ export default async function AdminLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect(`/${locale}`)
-  }
+  if (!user) redirect(`/${locale}/login`)
 
-  const { data: userRow } = await supabase
+  const service = createServiceClient()
+
+  const { data: userRow } = await service
     .from('users')
-    .select('role')
+    .select('role, full_name')
     .eq('id', user.id)
     .single()
 
-  if ((userRow as AdminUserRow | null)?.role !== 'admin') {
-    redirect(`/${locale}`)
-  }
+  if (userRow?.role !== 'admin') redirect(`/${locale}`)
+
+  const { count: pendingVerifications } = await service
+    .from('certifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending')
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col px-4 py-6 sm:px-6">
-      <div className="mb-6 rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Moderate providers, categories, verification, and reviews.
-          </p>
-        </div>
-
-        <nav className="-mx-1 overflow-x-auto">
-          <div className="flex min-w-max gap-2 px-1">
-            {tabs.map((tab) => (
-              <Link
-                key={tab.href}
-                href={`/${locale}/admin/${tab.href}`}
-                className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
-              >
-                {tab.label}
-              </Link>
-            ))}
-          </div>
-        </nav>
-      </div>
-
-      {children}
+    <div className="flex min-h-screen bg-gray-50">
+      <AdminSidebar
+        locale={locale}
+        pendingVerifications={pendingVerifications ?? 0}
+        adminName={userRow.full_name}
+      />
+      <main className="ml-56 flex-1 px-8 py-8">{children}</main>
     </div>
   )
 }

@@ -20,3 +20,25 @@ export async function toggleProviderActive(
   revalidatePath('/en/admin/providers')
   revalidatePath('/th/admin/providers')
 }
+
+export async function updateProviderTier(
+  profileId: string,
+  tier: import('@/types/database').SubscriptionTier
+): Promise<{ error: string } | void> {
+  const supabase = createServiceClient()
+  const { error } = await supabase
+    .from('provider_profiles')
+    .update({ subscription_tier: tier })
+    .eq('id', profileId)
+  if (error) return { error: error.message }
+  revalidatePath('/en/admin/providers')
+  revalidatePath('/th/admin/providers')
+}
+
+export async function deleteProvider(profileId: string): Promise<{ error: string } | void> {
+  const supabase = createServiceClient()
+  const { error } = await supabase.from('provider_profiles').delete().eq('id', profileId)
+  if (error) return { error: error.message }
+  revalidatePath('/en/admin/providers')
+  revalidatePath('/th/admin/providers')
+}
