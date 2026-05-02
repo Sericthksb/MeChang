@@ -4,6 +4,28 @@ import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createClient } from '@/lib/supabase/server'
 
+function decodeServiceKeyMeta() {
+  const token = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!token) return { role: 'missing', ref: 'missing' }
+
+  try {
+    const [, payload] = token.split('.')
+    if (!payload) return { role: 'invalid', ref: 'invalid' }
+
+    const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
+      role?: string
+      ref?: string
+    }
+
+    return {
+      role: decoded.role ?? 'unknown',
+      ref: decoded.ref ?? 'unknown',
+    }
+  } catch {
+    return { role: 'decode-failed', ref: 'decode-failed' }
+  }
+}
+
 function revalidateVerification() {
   revalidatePath('/en/admin/verification')
   revalidatePath('/th/admin/verification')
@@ -37,12 +59,14 @@ export async function approveId(userId: string): Promise<{ error: string } | nul
   if (verifyError) return { error: verifyError.message }
   if (!updatedUser.id_verified) {
     const updatedRow = updatedRows?.[0]
+    const serviceKey = decodeServiceKeyMeta()
     return {
       error:
         `ID approval mismatch: before=${beforeUser.id_verified}, ` +
         `updated=${updatedRow?.id_verified ?? 'none'}, ` +
         `after=${updatedUser.id_verified}, ` +
-        `doc=${updatedUser.id_document_url ? 'present' : 'missing'}`,
+        `doc=${updatedUser.id_document_url ? 'present' : 'missing'}, ` +
+        `role=${serviceKey.role}, ref=${serviceKey.ref}`,
     }
   }
 
