@@ -11,22 +11,39 @@ function revalidateVerification() {
 
 export async function approveId(userId: string): Promise<{ error: string } | null> {
   const supabase = createServiceClient()
-  const { error } = await supabase
+
+  const { data: beforeUser, error: beforeError } = await supabase
+    .from('users')
+    .select('id, id_verified, id_document_url')
+    .eq('id', userId)
+    .single()
+
+  if (beforeError) return { error: `ID approve precheck failed: ${beforeError.message}` }
+
+  const { data: updatedRows, error } = await supabase
     .from('users')
     .update({ id_verified: true })
     .eq('id', userId)
+    .select('id, id_verified, id_document_url')
 
   if (error) return { error: error.message }
 
   const { data: updatedUser, error: verifyError } = await supabase
     .from('users')
-    .select('id_verified')
+    .select('id, id_verified, id_document_url')
     .eq('id', userId)
     .single()
 
   if (verifyError) return { error: verifyError.message }
   if (!updatedUser.id_verified) {
-    return { error: 'ID approval did not persist in the database' }
+    const updatedRow = updatedRows?.[0]
+    return {
+      error:
+        `ID approval mismatch: before=${beforeUser.id_verified}, ` +
+        `updated=${updatedRow?.id_verified ?? 'none'}, ` +
+        `after=${updatedUser.id_verified}, ` +
+        `doc=${updatedUser.id_document_url ? 'present' : 'missing'}`,
+    }
   }
 
   revalidateVerification()
