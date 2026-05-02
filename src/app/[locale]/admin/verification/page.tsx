@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createServiceClient } from '@/lib/supabase/service'
 import AdminBadge from '@/components/admin/AdminBadge'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
