@@ -1,7 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import AdminBadge from '@/components/admin/AdminBadge'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { approveCert, approveId, rejectCert, rejectId } from './actions'
+import { IdActions, CertActions } from './VerificationActions'
 import type { Certification, ProviderProfile, User } from '@/types/database'
 
 interface VerificationPageProps {
@@ -153,26 +153,7 @@ export default async function AdminVerificationPage({ params }: VerificationPage
                         )}
                       </td>
                       <td className="px-3 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          <form action={approveId}>
-                            <input type="hidden" name="userId" value={queueUser.id} />
-                            <button
-                              type="submit"
-                              className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
-                            >
-                              Approve
-                            </button>
-                          </form>
-                          <form action={rejectId}>
-                            <input type="hidden" name="userId" value={queueUser.id} />
-                            <button
-                              type="submit"
-                              className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                            >
-                              Reject
-                            </button>
-                          </form>
-                        </div>
+                        <IdActions userId={queueUser.id} />
                       </td>
                     </tr>
                   ))
@@ -241,27 +222,7 @@ export default async function AdminVerificationPage({ params }: VerificationPage
                           )}
                         </td>
                         <td className="px-3 py-4">
-                          <div className="flex flex-wrap gap-2">
-                            <form action={approveCert}>
-                              <input type="hidden" name="certId" value={cert.id} />
-                              <input type="hidden" name="providerId" value={cert.provider_id} />
-                              <button
-                                type="submit"
-                                className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-600"
-                              >
-                                Approve
-                              </button>
-                            </form>
-                            <form action={rejectCert}>
-                              <input type="hidden" name="certId" value={cert.id} />
-                              <button
-                                type="submit"
-                                className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-                              >
-                                Reject
-                              </button>
-                            </form>
-                          </div>
+                          <CertActions certId={cert.id} providerId={cert.provider_id} />
                         </td>
                       </tr>
                     )

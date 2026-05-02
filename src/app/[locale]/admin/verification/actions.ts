@@ -9,17 +9,13 @@ function revalidateVerification() {
   revalidatePath('/th/admin/verification')
 }
 
-export async function approveId(formData: FormData): Promise<void> {
-  const userId = formData.get('userId') as string
-  if (!userId) return
+export async function approveId(userId: string): Promise<void> {
   const supabase = createServiceClient()
   await supabase.from('users').update({ id_verified: true }).eq('id', userId)
   revalidateVerification()
 }
 
-export async function rejectId(formData: FormData): Promise<void> {
-  const userId = formData.get('userId') as string
-  if (!userId) return
+export async function rejectId(userId: string): Promise<void> {
   const supabase = createServiceClient()
   await supabase
     .from('users')
@@ -28,15 +24,11 @@ export async function rejectId(formData: FormData): Promise<void> {
   revalidateVerification()
 }
 
-export async function approveCert(formData: FormData): Promise<void> {
-  const certId = formData.get('certId') as string
-  const providerId = formData.get('providerId') as string
-  if (!certId || !providerId) return
-
+export async function approveCert(certId: string, providerId: string): Promise<void> {
   const authClient = await createClient()
   const { data: { user } } = await authClient.auth.getUser()
-
   const supabase = createServiceClient()
+
   await supabase
     .from('certifications')
     .update({
@@ -51,14 +43,11 @@ export async function approveCert(formData: FormData): Promise<void> {
   revalidateVerification()
 }
 
-export async function rejectCert(formData: FormData): Promise<void> {
-  const certId = formData.get('certId') as string
-  if (!certId) return
-
+export async function rejectCert(certId: string): Promise<void> {
   const authClient = await createClient()
   const { data: { user } } = await authClient.auth.getUser()
-
   const supabase = createServiceClient()
+
   await supabase
     .from('certifications')
     .update({
